@@ -14,6 +14,7 @@ setuptools.setup(
         "Bug Tracker": "https://github.com/solita-internal/ade-notifier/issues"
     },
     license='MIT',
-    packages=['ade_manifest', 'ade_notifier'],
+    packages=['adenotifier'],
+    py_modules=['manifest', 'notifier']
     install_requires=['requests']
 )
