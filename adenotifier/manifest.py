@@ -63,14 +63,14 @@ class Manifest:
         response = None
         
         try:
-            match http_method:
-                case "get":
-                    response = self.__session.get(request_url, data=json.dumps(request_body))
-                case "post":
-                    response = self.__session.post(request_url, data=json.dumps(request_body))
-                case "put":
-                    response = self.__session.put(request_url, data=json.dumps(request_body))
+            if (http_method == "get"):
+                response = self.__session.get(request_url, data=json.dumps(request_body))
+            elif (http_method == "post"):
+                response = self.__session.post(request_url, data=json.dumps(request_body))
+            elif (http_method == "put"):  
+                response = self.__session.put(request_url, data=json.dumps(request_body))
             response.raise_for_status()
+            
         except Exception as e:
             self.__latest_response = response
             raise Exception(e)
