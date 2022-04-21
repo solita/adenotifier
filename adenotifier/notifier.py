@@ -3,7 +3,7 @@ import logging
 import re
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
-from .ade_manifest import Manifest
+from manifest import Manifest
 
 def search_manifests(source_system_name: str, source_entity_name: str, state: str, base_url: str, notify_api_key: str, notify_api_key_secret: str):
     """Searches manifests from ADE Notify API.
