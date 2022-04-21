@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='ade-notifier',
+    name='ade_notifier',
     version='0.0.1',
     author='Taha Gad, Henri Hemminki',
     author_email='taha.gad@solita.fi, henri.hemminki@solita.fi',
@@ -17,6 +17,6 @@ setuptools.setup(
         "Bug Tracker": "https://github.com/solita-internal/ade-notifier/issues"
     },
     license='MIT',
-    packages=['ade-notifier'],
+    packages=['ade_notifier'],
     install_requires=['requests']
 )
