@@ -1,4 +1,3 @@
-
 import setuptools
 
 with open("README.md", "r", encoding="utf-8") as fh:
@@ -17,6 +16,6 @@ setuptools.setup(
         "Bug Tracker": "https://github.com/solita-internal/ade-notifier/issues"
     },
     license='MIT',
-    packages=['ade_notifier'],
+    packages=['manifest', 'functions'],
     install_requires=['requests']
 )
