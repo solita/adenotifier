@@ -56,8 +56,8 @@ where:
 | id  | x | Unique identifier for the data source. |
 | ade_source_system | x | Source system defined for the source entity in ADE. |
 | ade_source_entity | x | Source entity name in ADE. |
-| batch_from_file_path_regex | | Regular expression for parsing a batch number from a file name. |
-| path_replace | | Old string value to be replaced in source file path. |
+| batch_from_file_path_regex | | Regular expression for parsing a batch number from a file name. Supports capturing groups, which are concatenated before casting to integer. |
+| path_replace | | Old string value to be replaced in the source file path. |
 | path_replace_with | | New string value the source file path will be replaced with. |
 | single_file_manifest | | Add_to_manifest calls notify_manifest after file has been added. |
 | columns | | ADE manifest parameter, see [Notify API documentation](https://ade.document360.io/docs/notify-api) |
