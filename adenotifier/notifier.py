@@ -29,7 +29,6 @@ def search_manifests(source_system_name: str, source_entity_name: str, state: st
 
     try:
         response = session.get(request_url + "?state={0}".format(state.upper()))
-        response.raise_for_status()
     except Exception as e:
         raise Exception(e)
 
