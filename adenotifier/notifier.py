@@ -23,7 +23,7 @@ def search_manifests(source_system_name: str, source_entity_name: str, state: st
     session = requests.Session()
     session.auth = (notify_api_key, notify_api_key_secret)
     session.headers.update({"Content-Type": "application/json"})
-    session.mount('http://', HTTPAdapter(max_retries=Retry(total=3, backoff_factor=2))) # Request retry settings.
+    session.mount('http://', HTTPAdapter(max_retries=Retry(total=3, status_forcelist=[429, 500, 502, 503, 504], backoff_factor=2))) # HTTP request retry settings.
     request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests"\
             .format(base_url, source_system_name, source_entity_name)
 
