@@ -7,10 +7,14 @@ Modules:
 
 ## Installation
 Install with pip:
-```pip install git+https://github.com/solita/adenotifier.git```
+```
+pip install git+https://github.com/solita/adenotifier.git
+```
 
 Include in requirements.txt:
-```git+https://github.com/solita/adenotifier.git```
+```
+git+https://github.com/solita/adenotifier.git
+```
 
 ## Usage
 ### notifier
