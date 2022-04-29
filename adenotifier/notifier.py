@@ -33,6 +33,8 @@ def search_manifests(source_system_name: str, source_entity_name: str, state: st
         raise Exception(e)
 
     manifests = response.json()
+    # Ordering manifests by created time
+    manifests = (sorted(manifests, key = lambda i: i['created']))
     manifest_ids = []
 
     for manifest in manifests:
@@ -148,10 +150,11 @@ def add_to_manifest(file_url: str, source: object, base_url: str, notify_api_key
                 base_url = base_url,
                 notify_api_key = notify_api_key,
                 notify_api_key_secret = notify_api_key_secret,
-                manifest_id = manifest.id[0]
+                manifest_id = manifest.id
             )
 
             if (len(manifest_entries) >= source['attributes']['max_files_in_manifest']):
+                logging.info('Max files in manifest reached. Creating a new manifest')
                 # Create a new manifest if current manifest has already reached max files limit
                 manifest.create()
                 logging.info('Manifest created: {0}'.format(manifest.id))
