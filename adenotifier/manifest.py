@@ -2,6 +2,7 @@ import requests
 import json
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
+from typing import List, Set, Dict, Tuple, Optional
 
 class Manifest:
     """Manages source data file manifests with ADE Notify API."""
@@ -18,7 +19,7 @@ class Manifest:
     __state: str = None
 
     batch: int = None
-    columns: list[str] = None
+    columns: List[str] = None
     compression: str = None
     delim: str = None
     fullscanned: bool = None
@@ -250,7 +251,7 @@ class Manifest:
         self.__api_caller("post", request_url, request_body)
         #self.__refresh_manifest_entries ## Disabled by default to reduce API calls, use fetch_manifest_entries().
 
-    def add_entries(self, entries: list[dict]):
+    def add_entries(self, entries: List[dict]):
         """Adds/overwrites multiple entries to manifest in Notify API.
 
         Args:
