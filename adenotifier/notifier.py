@@ -115,7 +115,7 @@ def add_to_manifest(file_url: str, source: object, base_url: str, notify_api_key
             manifest.fetch_manifest(open_manifests[-1])
 
             manifest.fetch_manifest_entries()
-            manifest_entries = manifest.manifest_entries()
+            manifest_entries = manifest.manifest_entries
 
             if (len(manifest_entries) >= source['attributes']['max_files_in_manifest']):
                 logging.info('Max files in manifest reached. Creating a new manifest')
