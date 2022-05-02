@@ -42,7 +42,8 @@ The functions expect a data source configuration JSON object in the following fo
         "batch_from_file_path_regex": "batch\\.(\\d*)\\.csv\\.gz",
         "path_replace": "https://",
         "path_replace_with": "azure://",
-        "single_file_manifest": false
+        "single_file_manifest": false,
+        "max_files_in_manifest": 1000
     },
     "manifest_parameters": {
         "columns": ["test1", "test2"],
@@ -64,6 +65,7 @@ where:
 | path_replace | | Old string value to be replaced in the source file path. |
 | path_replace_with | | New string value the source file path will be replaced with. |
 | single_file_manifest | | Add_to_manifest calls notify_manifest after file has been added. |
+| max_files_in_manifest | | Max files to be added to single manifest. |
 | columns | | ADE manifest parameter, see [Notify API documentation](https://ade.document360.io/docs/notify-api) |
 | compression | | ADE manifest parameter, see [Notify API documentation](https://ade.document360.io/docs/notify-api) |
 | delim | | ADE manifest parameter, see [Notify API documentation](https://ade.document360.io/docs/notify-api) |
