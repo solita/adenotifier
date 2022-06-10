@@ -5,7 +5,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 from .manifest import Manifest
 
-def search_manifests(source_system_name: str, source_entity_name: str, state: str, base_url: str, notify_api_key: str, notify_api_key_secret: str):
+def search_manifests(source_system_name: str, source_entity_name: str, base_url: str, notify_api_key: str, notify_api_key_secret: str, state: str):
     """Searches manifests from ADE Notify API.
 
     Args:
@@ -28,19 +28,18 @@ def search_manifests(source_system_name: str, source_entity_name: str, state: st
             .format(base_url, source_system_name, source_entity_name)
 
     try:
-        response = session.get(request_url + "?state={0}".format(state.upper()))
+        if state != "":
+            response = session.get(request_url + "?state={0}".format(state.upper()))
+        else:
+            response = session.get(request_url)
     except Exception as e:
         raise Exception(e)
 
     manifests = response.json()
     # Ordering manifests by created time
     manifests = (sorted(manifests, key = lambda i: i['created']))
-    manifest_ids = []
-
-    for manifest in manifests:
-        manifest_ids.append(manifest['id'])
     
-    return manifest_ids
+    return manifests
 
 def parse_batch(file_url: str, regexp: str):
     """Parses batch number from given file url with given regular expression.
@@ -77,12 +76,17 @@ def add_to_manifest(file_url: str, source: object, base_url: str, notify_api_key
     open_manifests = search_manifests(
         source_system_name = source['attributes']['ade_source_system'],
         source_entity_name = source['attributes']['ade_source_entity'],
-        state = "OPEN",
         base_url = base_url,   
         notify_api_key = notify_api_key,
         notify_api_key_secret = notify_api_key_secret,
+        state = "OPEN"
     )
-    logging.info('Open manifests: {0}'.format(open_manifests))
+    open_manifest_ids = []
+
+    for open_manifest_id in open_manifests:
+        open_manifest_ids.append(open_manifest_id['id'])
+
+    logging.info('Open manifests: {0}'.format(open_manifest_ids))
 
     # Initialize a manifest object with mandatory attributes.
     manifest = Manifest(
@@ -106,13 +110,13 @@ def add_to_manifest(file_url: str, source: object, base_url: str, notify_api_key
     if ('skiph' in source['manifest_parameters']):
         manifest.skiph = source['manifest_parameters']['skiph']
 
-    if (open_manifests == []):
+    if (open_manifest_ids == []):
         # Create a new manifest if open manifests are not found.
         manifest.create()
         logging.info('Manifest created: {0}'.format(manifest.id))
     else:
         if ('max_files_in_manifest' in source['attributes']):
-            manifest.fetch_manifest(open_manifests[-1])
+            manifest.fetch_manifest(open_manifest_ids[-1])
 
             manifest.fetch_manifest_entries()
             manifest_entries = manifest.manifest_entries
@@ -124,11 +128,11 @@ def add_to_manifest(file_url: str, source: object, base_url: str, notify_api_key
                 logging.info('Manifest created: {0}'.format(manifest.id))
             else:
                 # Use latest existing manifest if open manifests are found and max_files_in_manifest not reached.
-                manifest.fetch_manifest(open_manifests[-1])
+                manifest.fetch_manifest(open_manifest_ids[-1])
                 logging.info('Using open manifest: {0}'.format(manifest.id))
         else:
             # Use latest existing manifest if open manifests are found.
-            manifest.fetch_manifest(open_manifests[-1])
+            manifest.fetch_manifest(open_manifest_ids[-1])
             logging.info('Using open manifest: {0}'.format(manifest.id))
         
     if ('path_replace' in source['attributes'] and 'path_replace_with' in source['attributes']):
@@ -173,11 +177,15 @@ def notify_manifests(source: object, base_url: str, notify_api_key: str, notify_
     open_manifests = search_manifests(
         source_system_name = source['attributes']['ade_source_system'],
         source_entity_name = source['attributes']['ade_source_entity'],
-        state = "OPEN",
         base_url = base_url,
         notify_api_key = notify_api_key,
-        notify_api_key_secret = notify_api_key_secret
+        notify_api_key_secret = notify_api_key_secret,
+        state = "OPEN"
     )
+    open_manifest_ids = []
+
+    for open_manifest_id in open_manifests:
+        open_manifest_ids.append(open_manifest_id['id'])
 
     # Initialize a manifest object with mandatory attributes.
     manifest = Manifest(
@@ -189,12 +197,12 @@ def notify_manifests(source: object, base_url: str, notify_api_key: str, notify_
         notify_api_key_secret = notify_api_key_secret
     )
 
-    if (open_manifests == []):
+    if (open_manifest_ids == []):
         # Warning if open manifests not found.
         logging.warning('Open manifests for source {0} not found when attempting to notify.'.format(source['id']))
     else:
         # Notify all open manifests for data source.
-        for manifest_id in open_manifests:
+        for manifest_id in open_manifest_ids:
             manifest.fetch_manifest(manifest_id)
             manifest.notify()
             logging.info('Notified manifest: {0}.'.format(manifest.id))
