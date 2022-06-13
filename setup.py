@@ -9,9 +9,9 @@ setuptools.setup(
     author='Taha Gad, Henri Hemminki',
     author_email='taha.gad@solita.fi, henri.hemminki@solita.fi',
     description='Python library for using ADE Notify API',
-    url='https://github.com/solita-internal/ade-notifier',
+    url='https://github.com/solita/adenotifier',
     project_urls = {
-        "Bug Tracker": "https://github.com/solita-internal/ade-notifier/issues"
+        "Bug Tracker": "https://github.com/solita/adenotifier/issues"
     },
     license='MIT',
     packages=['adenotifier'],
