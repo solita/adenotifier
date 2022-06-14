@@ -44,7 +44,7 @@ class Manifest:
         self.__session = requests.Session()
         self.__session.auth = (notify_api_key, notify_api_key_secret)
         self.__session.headers.update({"Content-Type": "application/json"})
-        self.__session.mount('https://', HTTPAdapter(max_retries=Retry(total=3, status_forcelist=[429, 500, 502, 503, 504], backoff_factor=2))) # HTTP request retry settings.
+        self.__session.mount('https://', HTTPAdapter(max_retries=Retry(total=3, status_forcelist=[401, 429, 500, 502, 503, 504], backoff_factor=2))) # HTTP request retry settings.
 
     def __api_caller(self, http_method: str, request_url: str, request_body: str = None):
         """Handles ADE Notify API calls.
