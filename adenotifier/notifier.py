@@ -35,11 +35,12 @@ def search_manifests(source_system_name: str, source_entity_name: str, base_url:
     except Exception as e:
         raise Exception(e)
 
-    manifests = response.json()
-    if manifests != []:
-        # Ordering manifests by created time
-        manifests = (sorted(manifests, key = lambda i: i['created']))
-    
+    if response.status_code == 200:
+        manifests = response.json()
+        if manifests != []:
+            # Ordering manifests by created time
+            manifests = (sorted(manifests, key = lambda i: i['created']))
+
     return manifests
 
 def parse_batch(file_url: str, regexp: str):
