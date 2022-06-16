@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name='adenotifier',
-    version='0.1.4',
+    version='0.1.5',
     author='Taha Gad, Henri Hemminki',
     author_email='taha.gad@solita.fi, henri.hemminki@solita.fi',
     description='Python library for using ADE Notify API',
