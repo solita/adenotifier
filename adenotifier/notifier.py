@@ -166,7 +166,7 @@ def add_to_manifest(file_url: str, source: object, base_url: str, notify_api_key
             notify_manifests(source, base_url, notify_api_key, notify_api_key_secret)
     return
 
-def add_multiple_entries_to_manifest(entries: List[dict], source: object, base_url: str, notify_api_key: str, notify_api_key_secret: str):
+def add_multiple_entries_to_manifest(entries: List[dict], source: object, base_url: str, notify_api_key: str, notify_api_key_secret: str, batch: int = None):
     """Utilizes Manifest class and other functions to add the given file_url to a manifest for the given configured data source.
 
     Args:
@@ -175,7 +175,7 @@ def add_multiple_entries_to_manifest(entries: List[dict], source: object, base_u
         base_url (str): ADE Notify API base url, e.g. https://external-api.{environment}.datahub.{tenant}.saas.agiledataengine.com:443/notify-api.
         notify_api_key (str): ADE Notify API key.
         notify_api_key_secret (str): ADE Notify API key secret.
-            
+        batch (int): Optional manifest-level batch id.
     """
     # Initialize a manifest object with mandatory attributes.
     manifest = Manifest(
@@ -198,6 +198,10 @@ def add_multiple_entries_to_manifest(entries: List[dict], source: object, base_u
         manifest.fullscanned = source['manifest_parameters']['fullscanned']
     if ('skiph' in source['manifest_parameters']):
         manifest.skiph = source['manifest_parameters']['skiph']
+
+    # Setting manifest-level batch if needed
+    if (batch is not None):
+        manifest.batch = batch
 
     # Create a new manifest.
     manifest.create()
