@@ -1,5 +1,5 @@
 # adenotifier
-This is a Python library for using Agile Data Engine Notify API. See [Notify API documentation](https://ade.document360.io/docs/notify-api).
+This is a Python library for using Agile Data Engine Notify API. See [Notify API documentation](https://docs.agiledataengine.com/docs/notify-api-saas).
 
 Modules:
 - manifest
@@ -66,12 +66,12 @@ where:
 | path_replace_with | | New string value the source file path will be replaced with. |
 | single_file_manifest | | Add_to_manifest calls notify_manifest after file has been added. |
 | max_files_in_manifest | | Max files to be added to single manifest. |
-| columns | | ADE manifest parameter, see [Notify API documentation](https://ade.document360.io/docs/notify-api) |
-| compression | | ADE manifest parameter, see [Notify API documentation](https://ade.document360.io/docs/notify-api) |
-| delim | | ADE manifest parameter, see [Notify API documentation](https://ade.document360.io/docs/notify-api) |
-| format | x | ADE manifest parameter, see [Notify API documentation](https://ade.document360.io/docs/notify-api) |
-| fullscanned | | ADE manifest parameter, see [Notify API documentation](https://ade.document360.io/docs/notify-api) |
-| skiph | | ADE manifest parameter, see [Notify API documentation](https://ade.document360.io/docs/notify-api) |
+| columns | | ADE manifest parameter, see [Notify API documentation](https://docs.agiledataengine.com/docs/notify-api-saas) |
+| compression | | ADE manifest parameter, see [Notify API documentation](https://docs.agiledataengine.com/docs/notify-api-saas) |
+| delim | | ADE manifest parameter, see [Notify API documentation](https://docs.agiledataengine.com/docs/notify-api-saas) |
+| format | x | ADE manifest parameter, see [Notify API documentation](https://docs.agiledataengine.com/docs/notify-api-saas) |
+| fullscanned | | ADE manifest parameter, see [Notify API documentation](https://docs.agiledataengine.com/docs/notify-api-saas) |
+| skiph | | ADE manifest parameter, see [Notify API documentation](https://docs.agiledataengine.com/docs/notify-api-saas) |
 
 In addition to these attributes, you may include other details in the configuration for the purposes of your application. For example, add the storage account name, container name and folder path (Azure) or bucket name and folder path (AWS, GCP) to identify the data source from a file url in a file created event before calling add_to_manifest or notify_manifests.
 
