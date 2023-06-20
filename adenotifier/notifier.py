@@ -75,21 +75,33 @@ def add_to_manifest(file_url: str, source: object, base_url: str, notify_api_key
         notify_api_key_secret (str): ADE Notify API key secret.
             
     """
-    # Search open manifests for data source.
-    open_manifests = search_manifests(
-        source_system_name = source['attributes']['ade_source_system'],
-        source_entity_name = source['attributes']['ade_source_entity'],
-        base_url = base_url,   
-        notify_api_key = notify_api_key,
-        notify_api_key_secret = notify_api_key_secret,
-        state = "OPEN"
-    )
+    
+    # Set single_file_manifest based on configuration
+    if ('single_file_manifest' in source['attributes']):
+        if(source['attributes']['single_file_manifest']):
+            single_file_manifest = True
+        else:
+            single_file_manifest = False
+    else:
+        single_file_manifest = False
+    
     open_manifest_ids = []
 
-    for open_manifest_id in open_manifests:
-        open_manifest_ids.append(open_manifest_id['id'])
+    # Search open manifests for data source if not single_file_manifest
+    if(not single_file_manifest):
+        open_manifests = search_manifests(
+            source_system_name = source['attributes']['ade_source_system'],
+            source_entity_name = source['attributes']['ade_source_entity'],
+            base_url = base_url,   
+            notify_api_key = notify_api_key,
+            notify_api_key_secret = notify_api_key_secret,
+            state = "OPEN"
+        )
+        
+        for open_manifest_id in open_manifests:
+            open_manifest_ids.append(open_manifest_id['id'])
 
-    logging.info('Open manifests: {0}'.format(open_manifest_ids))
+        logging.info('Open manifests: {0}'.format(open_manifest_ids))
 
     # Initialize a manifest object with mandatory attributes.
     manifest = Manifest(
@@ -159,11 +171,11 @@ def add_to_manifest(file_url: str, source: object, base_url: str, notify_api_key
     manifest.add_entry(entry_path, batch)
     logging.info('Added entry: {0}'.format(entry_path))
     
-    if ('single_file_manifest' in source['attributes']):
-        if(source['attributes']['single_file_manifest']):
-            # Run notify for source if single_file_manifest = true
-            logging.info('Single_file_manifest set as true, notifying manifests.')
-            notify_manifests(source, base_url, notify_api_key, notify_api_key_secret)
+    # Notify manifest if single_file_manifest = true
+    if (single_file_manifest):
+        logging.info('Single_file_manifest set as true, notifying...')
+        manifest.notify()
+        logging.info('Notified manifest: {0}.'.format(manifest.id))
     return
 
 def add_multiple_entries_to_manifest(entries: List[dict], source: object, base_url: str, notify_api_key: str, notify_api_key_secret: str, batch: int = None):
