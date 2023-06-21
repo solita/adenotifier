@@ -13,9 +13,9 @@ Install with pip:
 pip install git+https://github.com/solita/adenotifier.git
 ```
 
-Include in requirements.txt:
+Include in requirements.txt (define version):
 ```
-git+https://github.com/solita/adenotifier.git
+git+https://github.com/solita/adenotifier.git@v0.2.0
 ```
 
 ## Usage
