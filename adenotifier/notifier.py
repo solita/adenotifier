@@ -168,12 +168,20 @@ def add_to_manifest(file_url: str, source: object, base_url: str, notify_api_key
         batch = None
 
     # Add entry to manifest.
-    manifest.add_entry(entry_path, batch)
+    try:
+        manifest.add_entry(entry_path, batch)
+    except Exception as e:
+        # Retry with a new manifest if e.g. an uncontrolled parallel execution has closed the manifest
+        logging.warning('Adding entry to manifest failed, retrying with a new manifest.')
+        manifest.create()
+        logging.info('Manifest created: {0}'.format(manifest.id))
+        manifest.add_entry(entry_path, batch)
+
     logging.info('Added entry: {0}'.format(entry_path))
     
     # Notify manifest if single_file_manifest = true
     if (single_file_manifest):
-        logging.info('Single_file_manifest set as true, notifying...')
+        logging.info('Single_file_manifest set as true, notifying.')
         manifest.notify()
         logging.info('Notified manifest: {0}.'.format(manifest.id))
     return
