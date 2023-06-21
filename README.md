@@ -5,6 +5,8 @@ Modules:
 - manifest
 - notifier
 
+**The repository is provided for reference purposes only and the solution may require modifications to fit your use case. Note that this solution is not part of the Agile Data Engine product. Please use at your own caution.**
+
 ## Installation
 Install with pip:
 ```
