@@ -68,11 +68,12 @@ class Manifest:
                 response = self.__session.get(request_url, data=json.dumps(request_body))
             elif (http_method == "post"):
                 response = self.__session.post(request_url, data=json.dumps(request_body))
-            elif (http_method == "put"):  
-                response = self.__session.put(request_url, data=json.dumps(request_body))            
+            elif (http_method == "put"):
+                response = self.__session.put(request_url, data=json.dumps(request_body))
+            response.raise_for_status()
         except Exception as e:
             self.__latest_response = response
-            raise Exception(e)
+            raise
 
         self.__latest_response = response
         return response

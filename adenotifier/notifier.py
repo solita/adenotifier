@@ -28,13 +28,11 @@ def search_manifests(source_system_name: str, source_entity_name: str, base_url:
     request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests"\
             .format(base_url, source_system_name, source_entity_name)
 
-    try:
-        if state != "":
-            response = session.get(request_url + "?state={0}".format(state.upper()))
-        else:
-            response = session.get(request_url)
-    except Exception as e:
-        raise Exception(e)
+    if state != "":
+        response = session.get(request_url + "?state={0}".format(state.upper()))
+    else:
+        response = session.get(request_url)
+    response.raise_for_status()
 
     if response.status_code == 200:
         manifests = response.json()
