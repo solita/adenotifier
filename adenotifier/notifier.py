@@ -21,6 +21,7 @@ def search_manifests(source_system_name: str, source_entity_name: str, base_url:
         List [str] of manifest ids.
 
     """
+    
     session = requests.Session()
     session.auth = (notify_api_key, notify_api_key_secret)
     session.headers.update({"Content-Type": "application/json"})
@@ -54,6 +55,7 @@ def parse_batch(file_url: str, regexp: str):
         Int batch number.
 
     """
+
     batch = ""
     result = re.search(regexp, file_url)
         
@@ -71,6 +73,9 @@ def add_to_manifest(file_url: str, source: object, base_url: str, notify_api_key
         base_url (str): ADE Notify API base url, e.g. https://external-api.{environment}.datahub.{tenant}.saas.agiledataengine.com:443/notify-api.
         notify_api_key (str): ADE Notify API key.
         notify_api_key_secret (str): ADE Notify API key secret.
+
+    Returns:
+        Manifest object.
             
     """
     
@@ -182,7 +187,8 @@ def add_to_manifest(file_url: str, source: object, base_url: str, notify_api_key
         logging.info('Single_file_manifest set as true, notifying.')
         manifest.notify()
         logging.info('Notified manifest: {0}.'.format(manifest.id))
-    return
+    
+    return manifest
 
 def add_multiple_entries_to_manifest(entries: List[dict], source: object, base_url: str, notify_api_key: str, notify_api_key_secret: str, batch: int = None):
     """Utilizes Manifest class and other functions to add the given file_url to a manifest for the given configured data source.
@@ -194,7 +200,12 @@ def add_multiple_entries_to_manifest(entries: List[dict], source: object, base_u
         notify_api_key (str): ADE Notify API key.
         notify_api_key_secret (str): ADE Notify API key secret.
         batch (int): Optional manifest-level batch id.
+
+    Returns:
+        Manifest object.
+
     """
+
     # Initialize a manifest object with mandatory attributes.
     manifest = Manifest(
         base_url = base_url,
@@ -249,7 +260,7 @@ def add_multiple_entries_to_manifest(entries: List[dict], source: object, base_u
     
     manifest.notify(manifest.id)
 
-    return
+    return manifest
 
 
 def notify_manifests(source: object, base_url: str, notify_api_key: str, notify_api_key_secret: str):
@@ -260,8 +271,12 @@ def notify_manifests(source: object, base_url: str, notify_api_key: str, notify_
         base_url (str): ADE Notify API base url, e.g. https://external-api.{environment}.datahub.{tenant}.saas.agiledataengine.com:443/notify-api.
         notify_api_key (str): ADE Notify API key.
         notify_api_key_secret (str): ADE Notify API key secret.
+
+    Returns:
+        Array of Manifest objects.
             
     """
+
     # Search open manifests for data source.
     open_manifests = search_manifests(
         source_system_name = source['attributes']['ade_source_system'],
@@ -286,6 +301,8 @@ def notify_manifests(source: object, base_url: str, notify_api_key: str, notify_
         notify_api_key_secret = notify_api_key_secret
     )
 
+    manifests = []
+
     if (open_manifest_ids == []):
         # Warning if open manifests not found.
         logging.warning('Open manifests for source {0} not found when attempting to notify.'.format(source['id']))
@@ -295,4 +312,6 @@ def notify_manifests(source: object, base_url: str, notify_api_key: str, notify_
             manifest.fetch_manifest(manifest_id)
             manifest.notify()
             logging.info('Notified manifest: {0}.'.format(manifest.id))
-    return
+            manifests.append(manifest)
+    
+    return manifests
