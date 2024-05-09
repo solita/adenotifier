@@ -3,9 +3,17 @@ import json
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 from typing import List, Set, Dict, Tuple, Optional
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    retry_if_exception_type,
+    wait_exponential,
+)
+
 
 class Manifest:
     """Manages source data file manifests with ADE Notify API."""
+
     __base_url: str = None
     __created: str = None
     __format: str = None
@@ -25,7 +33,15 @@ class Manifest:
     fullscanned: bool = None
     skiph: int = None
 
-    def __init__(self, base_url: str, source_system_name: str, source_entity_name: str, format: str, notify_api_key: str, notify_api_key_secret: str):
+    def __init__(
+        self,
+        base_url: str,
+        source_system_name: str,
+        source_entity_name: str,
+        format: str,
+        notify_api_key: str,
+        notify_api_key_secret: str,
+    ):
         """Class constructor.
 
         Args:
@@ -44,16 +60,34 @@ class Manifest:
         self.__session = requests.Session()
         self.__session.auth = (notify_api_key, notify_api_key_secret)
         self.__session.headers.update({"Content-Type": "application/json"})
-        self.__session.mount('https://', HTTPAdapter(max_retries=Retry(total=3, status_forcelist=[401, 404, 429, 500, 502, 503, 504], backoff_factor=2, allowed_methods=None, raise_on_status=True))) # HTTP request retry settings.
+        self.__session.mount(
+            "https://",
+            HTTPAdapter(
+                max_retries=Retry(
+                    total=False,
+                    status_forcelist=[401, 404, 429, 500, 502, 503, 504],
+                    backoff_factor=2,
+                    allowed_methods=None,
+                    raise_on_status=True,
+                )
+            ),
+        )  # HTTP request retry settings.
 
-    def __api_caller(self, http_method: str, request_url: str, request_body: str = None):
+    @retry(
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        stop=stop_after_attempt(3),
+        retry=retry_if_exception_type(requests.exceptions.RequestException),
+    )
+    def __api_caller(
+        self, http_method: str, request_url: str, request_body: str = None
+    ):
         """Handles ADE Notify API calls.
 
         Args:
             http_method (str): Supported values: "get", "post" or "put".
             request_url (str): Request url.
             request_body (str, optional): Request body, if expected by ADE Notify API.
-        
+
         Returns:
             requests.Response object.
 
@@ -62,14 +96,20 @@ class Manifest:
 
         """
         response = None
-        
+
         try:
-            if (http_method == "get"):
-                response = self.__session.get(request_url, data=json.dumps(request_body))
-            elif (http_method == "post"):
-                response = self.__session.post(request_url, data=json.dumps(request_body))
-            elif (http_method == "put"):
-                response = self.__session.put(request_url, data=json.dumps(request_body))
+            if http_method == "get":
+                response = self.__session.get(
+                    request_url, data=json.dumps(request_body)
+                )
+            elif http_method == "post":
+                response = self.__session.post(
+                    request_url, data=json.dumps(request_body)
+                )
+            elif http_method == "put":
+                response = self.__session.put(
+                    request_url, data=json.dumps(request_body)
+                )
             response.raise_for_status()
         except Exception as e:
             self.__latest_response = response
@@ -80,98 +120,117 @@ class Manifest:
 
     def __refresh_manifest(self):
         """Gets manifest from ADE Notify API, updates object attribute values."""
-        request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests/{3}"\
-            .format(self.__base_url, self.__source_system_name, self.__source_entity_name, self.__id)
+        request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests/{3}".format(
+            self.__base_url,
+            self.__source_system_name,
+            self.__source_entity_name,
+            self.__id,
+        )
 
         response = self.__api_caller("get", request_url)
         response_body = response.json()
-        self.batch = response_body['batch']
-        self.columns = response_body['columns']
-        self.compression = response_body['compression']
-        self.__created = response_body['created']
-        self.delim = response_body['delim']
-        self.__format = response_body['format']
-        self.fullscanned = response_body['fullscanned']
-        self.__id = response_body['id']
-        self.__modified = response_body['modified']
-        self.skiph = response_body['skiph']
-        self.__state = response_body['state']
+        self.batch = response_body["batch"]
+        self.columns = response_body["columns"]
+        self.compression = response_body["compression"]
+        self.__created = response_body["created"]
+        self.delim = response_body["delim"]
+        self.__format = response_body["format"]
+        self.fullscanned = response_body["fullscanned"]
+        self.__id = response_body["id"]
+        self.__modified = response_body["modified"]
+        self.skiph = response_body["skiph"]
+        self.__state = response_body["state"]
 
     def __refresh_manifest_entries(self):
         """Gets manifest entries from Notify API, sets object attribute values."""
-        request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests/{3}/entries"\
-            .format(self.__base_url, self.__source_system_name, self.__source_entity_name, self.__id)
+        request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests/{3}/entries".format(
+            self.__base_url,
+            self.__source_system_name,
+            self.__source_entity_name,
+            self.__id,
+        )
 
         response = self.__api_caller("get", request_url)
         self.__manifest_entries = response.json()
 
     """Getters for private attributes."""
+
     @property
     def base_url(self):
         return self.__base_url
+
     @property
     def created(self):
         return self.__created
+
     @property
     def format(self):
         return self.__format
+
     @property
     def id(self):
         return self.__id
+
     @property
     def latest_response(self):
         return self.__latest_response
+
     @property
     def manifest_entries(self):
         return self.__manifest_entries
+
     @property
     def modified(self):
         return self.__modified
+
     @property
     def source_entity_name(self):
         return self.__source_entity_name
+
     @property
     def source_system_name(self):
         return self.__source_system_name
+
     @property
     def state(self):
         return self.__state
-    
+
     def create(self):
         """Creates new manifest in ADE Notify API, sets object attribute values from response."""
-        request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests"\
-            .format(self.__base_url, self.__source_system_name, self.__source_entity_name)
+        request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests".format(
+            self.__base_url, self.__source_system_name, self.__source_entity_name
+        )
 
         request_body = {}
-        request_body['format'] = self.__format
+        request_body["format"] = self.__format
 
         # Set optional manifest attributes if defined.
         if self.batch != None:
-            request_body['batch'] = self.batch
+            request_body["batch"] = self.batch
         if self.columns != None:
-            request_body['columns'] = self.columns
+            request_body["columns"] = self.columns
         if self.compression != None:
-            request_body['compression'] = self.compression
+            request_body["compression"] = self.compression
         if self.delim != None:
-            request_body['delim'] = self.delim
+            request_body["delim"] = self.delim
         if self.fullscanned != None:
-            request_body['fullscanned'] = self.fullscanned
+            request_body["fullscanned"] = self.fullscanned
         if self.skiph != None:
-            request_body['skiph'] = self.skiph
+            request_body["skiph"] = self.skiph
 
         response = self.__api_caller("post", request_url, request_body)
         response_body = response.json()
-        self.batch = response_body['batch']
-        self.columns = response_body['columns']
-        self.compression = response_body['compression']
-        self.__created = response_body['created']
-        self.delim = response_body['delim']
-        self.__format = response_body['format']
-        self.fullscanned = response_body['fullscanned']
-        self.__id = response_body['id']
-        self.__modified = response_body['modified']
-        self.skiph = response_body['skiph']
-        self.__state = response_body['state']
+        self.batch = response_body["batch"]
+        self.columns = response_body["columns"]
+        self.compression = response_body["compression"]
+        self.__created = response_body["created"]
+        self.delim = response_body["delim"]
+        self.__format = response_body["format"]
+        self.fullscanned = response_body["fullscanned"]
+        self.__id = response_body["id"]
+        self.__modified = response_body["modified"]
+        self.skiph = response_body["skiph"]
+        self.__state = response_body["state"]
 
     def fetch_manifest(self, id: str = None):
         """Calls __refresh_manifest().
@@ -183,13 +242,15 @@ class Manifest:
             ValueError if manifest id is not set.
 
         """
-        if (id != None):
+        if id != None:
             self.__id = id
-        
-        if (self.__id != None):
+
+        if self.__id != None:
             self.__refresh_manifest()
         else:
-            raise ValueError("Manifest id = None. Create or get manifest before notifying.")
+            raise ValueError(
+                "Manifest id = None. Create or get manifest before notifying."
+            )
 
     def fetch_manifest_entries(self):
         """Calls __refresh_manifest_entries().
@@ -198,10 +259,12 @@ class Manifest:
             ValueError if manifest id is not set.
 
         """
-        if (self.__id != None):
+        if self.__id != None:
             self.__refresh_manifest_entries()
         else:
-            raise ValueError("Manifest id = None. Create or get manifest before notifying.")
+            raise ValueError(
+                "Manifest id = None. Create or get manifest before notifying."
+            )
 
     def notify(self, id: str = None):
         """Notifies manifest in Notify API.
@@ -213,19 +276,27 @@ class Manifest:
             ValueError if manifest id is not set.
 
         """
-        if (id != None):
+        if id != None:
             self.__id = id
-            #self.__refresh_manifest ## Disabled by default to reduce API calls, use fetch_manifest().
+            # self.__refresh_manifest ## Disabled by default to reduce API calls, use fetch_manifest().
 
-        if (self.__id != None):
-            request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests/{3}/notify"\
-                .format(self.__base_url, self.__source_system_name, self.__source_entity_name, self.__id)
+        if self.__id != None:
+            request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests/{3}/notify".format(
+                self.__base_url,
+                self.__source_system_name,
+                self.__source_entity_name,
+                self.__id,
+            )
             self.__api_caller("post", request_url)
-            #self.__refresh_manifest ## Disabled by default to reduce API calls, use fetch_manifest().
+            # self.__refresh_manifest ## Disabled by default to reduce API calls, use fetch_manifest().
         else:
-            raise ValueError("Manifest id = None. Create or get manifest before notifying.")
+            raise ValueError(
+                "Manifest id = None. Create or get manifest before notifying."
+            )
 
-    def add_entry(self, source_file: str, batch: int = None, content_length: int = None):   
+    def add_entry(
+        self, source_file: str, batch: int = None, content_length: int = None
+    ):
         """Appends single entry to manifest in Notify API.
 
         Args:
@@ -234,23 +305,27 @@ class Manifest:
             content_length (int, optional): Content length.
 
         """
-        if (self.__id == None):
+        if self.__id == None:
             self.create()
-        
-        request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests/{3}/entries"\
-            .format(self.__base_url, self.__source_system_name, self.__source_entity_name, self.__id)
+
+        request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests/{3}/entries".format(
+            self.__base_url,
+            self.__source_system_name,
+            self.__source_entity_name,
+            self.__id,
+        )
 
         request_body = {}
-        request_body['sourceFile'] = source_file
+        request_body["sourceFile"] = source_file
 
         # Set optional manifest entry attributes if defined.
-        if (batch != None):
-            request_body['batch'] = batch
-        if (content_length != None):
-            request_body['contentLength'] = content_length
+        if batch != None:
+            request_body["batch"] = batch
+        if content_length != None:
+            request_body["contentLength"] = content_length
 
         self.__api_caller("post", request_url, request_body)
-        #self.__refresh_manifest_entries ## Disabled by default to reduce API calls, use fetch_manifest_entries().
+        # self.__refresh_manifest_entries ## Disabled by default to reduce API calls, use fetch_manifest_entries().
 
     def add_entries(self, entries: List[dict]):
         """Adds/overwrites multiple entries to manifest in Notify API.
@@ -259,11 +334,15 @@ class Manifest:
             entries (list[dict]): List of manifest entry dictionaries.
 
         """
-        if (self.__id == None):
+        if self.__id == None:
             self.create()
 
-        request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests/{3}/entries"\
-            .format(self.__base_url, self.__source_system_name, self.__source_entity_name, self.__id)
-        
+        request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests/{3}/entries".format(
+            self.__base_url,
+            self.__source_system_name,
+            self.__source_entity_name,
+            self.__id,
+        )
+
         self.__api_caller("put", request_url, entries)
-        #self.__refresh_manifest_entries ## Disabled by default to reduce API calls, use fetch_manifest_entries().
+        # self.__refresh_manifest_entries ## Disabled by default to reduce API calls, use fetch_manifest_entries().
