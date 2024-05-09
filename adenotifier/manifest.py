@@ -2,7 +2,6 @@ import requests
 import json
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
-from typing import List, Set, Dict, Tuple, Optional
 from tenacity import (
     retry,
     stop_after_attempt,
@@ -212,17 +211,17 @@ class Manifest:
         request_body["format"] = self.__format
 
         # Set optional manifest attributes if defined.
-        if self.batch != None:
+        if self.batch is not None:
             request_body["batch"] = self.batch
-        if self.columns != None:
+        if self.columns is not None:
             request_body["columns"] = self.columns
-        if self.compression != None:
+        if self.compression is not None:
             request_body["compression"] = self.compression
-        if self.delim != None:
+        if self.delim is not None:
             request_body["delim"] = self.delim
-        if self.fullscanned != None:
+        if self.fullscanned is not None:
             request_body["fullscanned"] = self.fullscanned
-        if self.skiph != None:
+        if self.skiph is not None:
             request_body["skiph"] = self.skiph
 
         response = self.__api_caller("post", request_url, request_body)
@@ -249,10 +248,10 @@ class Manifest:
             ValueError if manifest id is not set.
 
         """
-        if id != None:
+        if id is not None:
             self.__id = id
 
-        if self.__id != None:
+        if self.__id is not None:
             self.__refresh_manifest()
         else:
             raise ValueError(
@@ -266,7 +265,7 @@ class Manifest:
             ValueError if manifest id is not set.
 
         """
-        if self.__id != None:
+        if self.__id is not None:
             self.__refresh_manifest_entries()
         else:
             raise ValueError(
@@ -283,11 +282,11 @@ class Manifest:
             ValueError if manifest id is not set.
 
         """
-        if id != None:
+        if id is not None:
             self.__id = id
             # self.__refresh_manifest ## Disabled by default to reduce API calls, use fetch_manifest().
 
-        if self.__id != None:
+        if self.__id is not None:
             request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests/{3}/notify".format(
                 self.__base_url,
                 self.__source_system_name,
@@ -312,7 +311,7 @@ class Manifest:
             content_length (int, optional): Content length.
 
         """
-        if self.__id == None:
+        if self.__id is None:
             self.create()
 
         request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests/{3}/entries".format(
@@ -326,9 +325,9 @@ class Manifest:
         request_body["sourceFile"] = source_file
 
         # Set optional manifest entry attributes if defined.
-        if batch != None:
+        if batch is not None:
             request_body["batch"] = batch
-        if content_length != None:
+        if content_length is not None:
             request_body["contentLength"] = content_length
 
         self.__api_caller("post", request_url, request_body)
@@ -341,7 +340,7 @@ class Manifest:
             entries (list[dict]): List of manifest entry dictionaries.
 
         """
-        if self.__id == None:
+        if self.__id is None:
             self.create()
 
         request_url = "{0}/tenants/local/installations/local/environments/local/source-systems/{1}/source-entities/{2}/manifests/{3}/entries".format(
