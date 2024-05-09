@@ -10,7 +10,13 @@ from tenacity import (
     stop_after_attempt,
     retry_if_exception_type,
     wait_exponential,
+    before_sleep_log,
 )
+
+import sys
+
+logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 # Use tenacity decorator to retry on RequestException, just in case there are network issues.
@@ -18,6 +24,7 @@ from tenacity import (
     wait=wait_exponential(multiplier=1, min=4, max=10),
     stop=stop_after_attempt(3),
     retry=retry_if_exception_type(requests.exceptions.RequestException),
+    before_sleep=before_sleep_log(logger, logging.DEBUG),
 )
 def search_manifests(
     source_system_name: str,

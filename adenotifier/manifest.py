@@ -8,7 +8,13 @@ from tenacity import (
     stop_after_attempt,
     retry_if_exception_type,
     wait_exponential,
+    before_sleep_log,
 )
+import logging
+import sys
+
+logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 class Manifest:
@@ -77,6 +83,7 @@ class Manifest:
         wait=wait_exponential(multiplier=1, min=4, max=10),
         stop=stop_after_attempt(3),
         retry=retry_if_exception_type(requests.exceptions.RequestException),
+        before_sleep=before_sleep_log(logger, logging.DEBUG),
     )
     def __api_caller(
         self, http_method: str, request_url: str, request_body: str = None
