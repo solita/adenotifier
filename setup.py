@@ -15,6 +15,5 @@ setuptools.setup(
     },
     license='MIT',
     packages=['adenotifier'],
-    py_modules=['manifest', 'notifier'],
-    install_requires=['requests']
+    install_requires=['requests', 'pydantic']
 )
