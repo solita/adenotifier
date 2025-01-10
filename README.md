@@ -1,3 +1,8 @@
+# DEPRECATED
+That repository is deprecated and not supported anymore.
+
+Please switch to the current version of the library: https://github.com/agile-data-engine/adenotifier 
+
 # adenotifier
 This is a Python library for using Agile Data Engine Notify API. See [Notify API documentation](https://docs.agiledataengine.com/docs/notify-api-saas).
 
